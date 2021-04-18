@@ -26,6 +26,7 @@ public class DefinitionSteps {
     PageFactoryManager pageFactoryManager;
     DriverPropertiesFileReader driverPropertiesFileReader;
     LoginDataXmlReader loginDataXmlReader;
+    private int amount;
 
     @Before
     public void testsSetUp() {
@@ -65,7 +66,7 @@ public class DefinitionSteps {
 
     }
 
-    int amount = 0;
+    
 
     @And("User gets amount of messages")
     public void userGetsAmountOfMessages() {
