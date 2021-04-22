@@ -36,10 +36,12 @@ public class LoginDataXmlReader {
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
     public String getLogin() {
-        return element.getElementsByTagName("login").item(0).getTextContent();
+        return element.getElementsByTagName("login").item(0).getTextContent() ;
     }
 
     public String getPassword() {

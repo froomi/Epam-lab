@@ -1,101 +1,88 @@
 package stepdefinitions;
 
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import manager.PageFactoryManager;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.*;
 import pages.HomePage;
 import pages.MailPage;
 import reader.DriverPropertiesFileReader;
 import reader.LoginDataXmlReader;
 
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 import static io.github.bonigarcia.wdm.WebDriverManager.chromedriver;
 import static org.testng.Assert.*;
 
 public class DefinitionSteps {
 
-    WebDriver driver;
-    HomePage homePage;
-    MailPage mailPage;
-    PageFactoryManager pageFactoryManager;
+
     DriverPropertiesFileReader driverPropertiesFileReader;
     LoginDataXmlReader loginDataXmlReader;
-    private int amount;
 
-    @Before
-    public void testsSetUp() {
-        chromedriver().setup();
-        driver = new ChromeDriver();
-        driverPropertiesFileReader = new DriverPropertiesFileReader();
-        driver.manage().timeouts().implicitlyWait(driverPropertiesFileReader.getImplicitlyWait(), TimeUnit.SECONDS);
+
+    private static ThreadLocal<WebDriver>  driverPool = new ThreadLocal<>();
+
+
+    @BeforeMethod
+    public void testSetUp() throws IOException {
+        System.setProperty("webdriver.chrome.driver", "src/main/resources/chromedriver.exe");
+        WebDriver driver = new ChromeDriver();
         driver.manage().window().maximize();
-        pageFactoryManager = new PageFactoryManager(driver);
-        homePage = pageFactoryManager.getHomePage();
-        mailPage = pageFactoryManager.getMailPage();
+        driverPool.set(driver);
         driverPropertiesFileReader = new DriverPropertiesFileReader();
+        getHomePage().openHomePage(driverPropertiesFileReader.getUrl());
+
+    }
+
+    public WebDriver getDriver(){return driverPool.get();}
+    public HomePage getHomePage() throws IOException { return new HomePage(getDriver()); }
+    public MailPage getMailPage() throws IOException {return  new MailPage(getDriver()) ;}
+
+
+    @DataProvider(name = "users", parallel = true)
+    public Iterator<Object[]> users(){
+        return Stream.of(
+                new Object[]{new LoginDataXmlReader(1)},
+                new Object[]{new LoginDataXmlReader(2) },
+                new Object[]{new LoginDataXmlReader(3) },
+                new Object[]{new LoginDataXmlReader(4) },
+                new Object[]{new LoginDataXmlReader(5) }).iterator();
 
     }
 
 
-    @Given("User opens home page")
-    public void userOpensHomePagePage(){
-        homePage.openHomePage(driverPropertiesFileReader.getUrl());
+    @Test(dataProvider = "users")
+    public void gmailTest(LoginDataXmlReader loginDataXmlReader) throws IOException, InterruptedException {
+
+        this.loginDataXmlReader = loginDataXmlReader;
+        getHomePage().enterLogin(loginDataXmlReader.getLogin());
+        getHomePage().waitVisibilityOfElement(driverPropertiesFileReader.getVisibilityOfElementWait(), getHomePage().getPasswordField());
+        getHomePage().enterPassword(loginDataXmlReader.getPassword());
+
+        Thread.sleep(4000);
+        getMailPage().clickOnThreeCheckboxes();
+        int amount = getMailPage().getMessagesAmount();
+        getMailPage().waitVisibilityOfElement(driverPropertiesFileReader.getVisibilityOfElementWait(), getMailPage().getDeleteButton());
+        getMailPage().waitElementToBeClickable(driverPropertiesFileReader.getElementToBeClickableWait(), getMailPage().getDeleteButton());
+        getMailPage().clickOnDeleteButton();
+
+        int counter = 3;
+        assertEquals(amount - counter, getMailPage().getMessagesAmount());
+        getMailPage().waitVisibilityOfElement(driverPropertiesFileReader.getVisibilityOfElementWait(), getMailPage().getUndoButton());
+        getMailPage().clickOnUndoButton();
+        Thread.sleep(500);
+        assertEquals(amount, getMailPage().getMessagesAmount());
     }
 
-    @And("User inputs login and presses Enter button")
-    public void userInputsLoginAndPressesEnterButton() {
-        loginDataXmlReader = new LoginDataXmlReader(1);
-        homePage.enterLogin(loginDataXmlReader.getLogin());
-    }
 
-    @And("User inputs password and presses Enter button again")
-    public void userInputsPasswordAndPressesEnterButtonAgain() {
-        homePage.waitVisibilityOfElement(driverPropertiesFileReader.getVisibilityOfElementWait(), homePage.getPasswordField());
-        homePage.enterPassword(loginDataXmlReader.getPassword());
-    }
+@AfterMethod
+public void driverClose(){
+    driverPool.get().close();
+}
 
-    @And("User clicks on first three messages' checkboxes")
-    public void userClicksOnFirstThreeMessagesCheckboxes() {
-        mailPage.clickOnThreeCheckboxes();
 
-    }
 
-    
-
-    @And("User gets amount of messages")
-    public void userGetsAmountOfMessages() {
-        amount = mailPage.getMessagesAmount();
-    }
-
-    @And("User deletes pointed messages")
-    public void userDeletesPointedMessages() {
-        mailPage.clickOnDeleteButton();
-    }
-
-    @And("User checks that messages were deleted")
-    public void userChecksThatMessagesWereDeleted() {
-        int counter = mailPage.getCounter();
-        assertEquals(amount - counter, mailPage.getMessagesAmount());
-    }
-
-    @Then("User clicks on Undo button")
-    public void userClicksOnUndoButton() {
-        mailPage.clickOnUndoButton();
-    }
-
-    @And("User checks that messages were returned")
-    public void userChecksThatMessagesWereReturned() {
-        assertEquals(amount, mailPage.getMessagesAmount());
-    }
-
-    @After
-    public void tearDown() {
-        driver.close();
-    }
 }

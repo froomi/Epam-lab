@@ -30,11 +30,18 @@ public class DriverPropertiesFileReader {
         return Integer.parseInt(implicitlyWait);
     }
 
+
+
     public int getVisibilityOfElementWait(){
         String visibilityOfElementWait = properties.getProperty("visibilityOfElementWait");
         return Integer.parseInt(visibilityOfElementWait);
     }
 
+
+    public int getElementToBeClickableWait(){
+        String elementToBeClickableWait = properties.getProperty("elementToBeClickableWait");
+        return Integer.parseInt(elementToBeClickableWait);
+    }
     public String getUrl(){
         return properties.getProperty("url");
     }
