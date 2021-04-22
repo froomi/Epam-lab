@@ -1,0 +1,6 @@
+pages\BasePage.class
+reader\LoginDataXmlReader.class
+stepdefinitions\DefinitionSteps.class
+pages\MailPage.class
+pages\HomePage.class
+reader\DriverPropertiesFileReader.class
