@@ -1,6 +1,5 @@
 package pages;
 
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -26,15 +25,14 @@ public class MailPage extends BasePage {
         super(driver);
     }
 
+    private int counter = 0;
 
     public void clickOnThreeCheckboxes(){
-        for(int i = 0; i < 3; i++) {
-            checkboxes.get(i).click();
+        while(counter < 3){
+            checkboxes.get(counter).click();
+            counter++;
         }
-    }
 
-    public WebElement getDeleteButton(){
-        return deleteButton;
     }
 
     public void clickOnDeleteButton(){
@@ -45,12 +43,14 @@ public class MailPage extends BasePage {
         return Integer.parseInt(messagesAmount.getText());
     }
 
-    public WebElement getUndoButton(){
-        return undoButton;
+    public int getCounter(){
+        return counter;
     }
 
     public void clickOnUndoButton(){
         undoButton.click();
     }
+
+
 
 }

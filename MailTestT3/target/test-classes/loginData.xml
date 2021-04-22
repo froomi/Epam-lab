@@ -6,22 +6,6 @@
             <login>fasye1632@gmail.com</login>
             <password>testPassword12</password>
         </user>
-        <user>
-            <login>atest3855@gmail.com</login>
-            <password>testPassword16</password>
-        </user>
-        <user>
-            <login>atest8641@gmail.com</login>
-            <password>testPassword16</password>
-        </user>
-        <user>
-            <login>testacc30008@gmail.com</login>
-            <password>testPassword16</password>
-        </user>
-        <user>
-            <login>testacc30009@gmail.com</login>
-            <password>testPassword16</password>
-        </user>
     </users>
 </data>
 
